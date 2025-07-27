@@ -34,6 +34,36 @@ string Login_Signup::generate_hash(const string &password, const string &salt) {
     return ss.str();            //The
 }
 
+bool Login_Signup::register_user(const string &username, const string &password, const string &filename) {
+    if (user_database.find(username) == user_database.end()) {
+        return false;
+    } else {
+        string salt = generate_salt();
+        string hashed_password = generate_hash(password, salt);
+
+        user_database[username] = make_pair(salt, hashed_password);
+        save_to_file(filename);
+        return true;
+    }
+}
+
+bool Login_Signup::verify_login(const string &username, const string &password) {
+    auto it = user_database.find(username);
+    if (it == user_database.end()) {
+        return false;
+    } else {
+        string retrieved_salt = it -> second.first;
+        string stored_hash = it -> second.second;
+        string computed_hash = generate_hash(password, retrieved_salt);
+
+        if (computed_hash == stored_hash) return true;
+        else {
+            cout << "Wrong password" << endl;
+            return false;
+        }
+    }
+}
+
 
 
 

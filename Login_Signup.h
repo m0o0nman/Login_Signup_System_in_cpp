@@ -23,7 +23,6 @@ public:
     void load_from_file(const string& filename);
 
     //Login_Signup(unordered_map<string, pair<string, string>> ud);
-
 };
 
 
