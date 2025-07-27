@@ -7,8 +7,10 @@
 
 using namespace std;
 
-Login_Signup::Login_Signup(unordered_map<string, pair<string, string> > ud) {
-    ud = user_database;
+Login_Signup::Login_Signup(unordered_map<string, pair<string, string>>& ud, string& fn) {
+    user_database = ud;
+    filename = fn;
+
 }
 
 string Login_Signup::generate_salt(const size_t length) {
@@ -43,7 +45,7 @@ string Login_Signup::generate_hash(const string &password, const string &salt) {
 bool Login_Signup::register_user(const string &username, const string &password, const string &filename) {
 
     //Checks whether the username exists or not. If exists, returns false.
-    if (user_database.find(username) != user_database.end()) {
+    if (user_database.contains(username)) {
         return false;
     } else {
         //If user is not found then salt is generated and password is hashed
@@ -90,9 +92,8 @@ void Login_Signup::save_to_file(const string &filename) {   //Saves new user dat
 }
 
 void Login_Signup::load_from_file(const string &filename) {  //Loads info(username, salt, hashed password) into the unordered map
-    ifstream file(filename);
 
-    if (!file) {
+    if (ifstream file(filename); !file) {
         cerr << "Error opening file: "<< filename <<endl;    //Prints error if the input stream couldn't read the file
     } else {
         string line;
@@ -102,8 +103,8 @@ void Login_Signup::load_from_file(const string &filename) {  //Loads info(userna
             size_t colon_2 = line.find(':',colon_1 + 1);
 
             //The string::npos is a constant of size_t used to indicate that the find() method didn't find the argument
-            //So, if the colon postions are not found the following block of copying username, salt and hahsed passord
-            //from the file and feding into the unordered map is not performed
+            //So, if the colon positions are not found the following block of copying username, salt and hahsed passord
+            //from the file and feeding into the unordered map is not performed
             if (colon_1 != string::npos && colon_2 != string::npos) {
                 //The substr(start, len) function takes 2 parameters, starting index and length
                 string username = line.substr(0, colon_1);                          //The index of 0 to index till position of colon_1(say 5) is username
