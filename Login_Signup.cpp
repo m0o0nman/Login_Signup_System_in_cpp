@@ -4,6 +4,10 @@
 #include <queue>
 #include <random>
 #include <fstream>
+#include <functional>
+#include <sstream>
+#include <iomanip>
+#include <unordered_map>
 
 using namespace std;
 
@@ -42,12 +46,18 @@ string Login_Signup::generate_hash(const string &password, const string &salt) {
     return ss.str();            //The stream is then converted into a string
 }
 
-bool Login_Signup::register_user(const string &username, const string &password, const string &filename) {
+bool Login_Signup::username_exists(const string& username) const {
+    return user_database.contains(username);
+}
 
-    //Checks whether the username exists or not. If exists, returns false.
-    if (user_database.contains(username)) {
+bool Login_Signup::register_user(string username, string password, const string &filename) {
+    if (username_exists(username)) {
         return false;
-    } else {
+    }
+    
+    if (username.empty() || password.empty()) {
+        return false;
+    }
         //If user is not found then salt is generated and password is hashed
         string salt = generate_salt();
         string hashed_password = generate_hash(password, salt);
@@ -56,26 +66,21 @@ bool Login_Signup::register_user(const string &username, const string &password,
         user_database[username] = make_pair(salt, hashed_password);
         save_to_file(filename);
         return true;
-    }
 }
 
 bool Login_Signup::verify_login(const string &username, const string &password) {
     //An iterator is used to access the key value(username) and the pair(salt and hashed password)
     auto it = user_database.find(username);
     if (it == user_database.end()) {
+        cerr << "   Username not found" << endl;
         return false;                                                       //If the username doesn't exist, returns false
-    } else {
+    }
 
         string retrieved_salt = it -> second.first;                     //The salt is in the second part's(pair) first element
         string stored_hash = it -> second.second;                       //The stored hash is the second part's(pair) second element
         string computed_hash = generate_hash(password, retrieved_salt);    //A new hash is made using user input for password and the retireved salt for that username
 
-        if (computed_hash == stored_hash) return true;                     //If the computed and stored hash matches then it returns true
-        else {
-            cout << "Wrong password" << endl;
-            return false;
-        }
-    }
+        return computed_hash == stored_hash;
 }
 
 void Login_Signup::save_to_file(const string &filename) {   //Saves new user data into the file
@@ -92,8 +97,8 @@ void Login_Signup::save_to_file(const string &filename) {   //Saves new user dat
 }
 
 void Login_Signup::load_from_file(const string &filename) {  //Loads info(username, salt, hashed password) into the unordered map
-
-    if (ifstream file(filename); !file) {
+    ifstream file(filename);
+    if (!file) {
         cerr << "Error opening file: "<< filename <<endl;    //Prints error if the input stream couldn't read the file
     } else {
         string line;

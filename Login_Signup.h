@@ -5,22 +5,23 @@
 
 using namespace std;
 class Login_Signup {
-private:
+
     string filename;
     unordered_map<string, pair<string, string>> user_database;
 
     
     //Function to generate salt randomly
-    static string generate_salt(const size_t length = 7);
+    static string generate_salt(size_t length = 7);
     //Function to crate a password by hashing user input and generated salt
     static string generate_hash(const string& password, const string& salt);
 
 public:
     //Functions for user authentification
-    bool register_user(const string& username, const string& password, const string& filename); //Constructor
-    bool verify_login(const string& username, const string& password);
-    //Functions to save or retrieve user data
+    bool username_exists(const string& username) const;                                      //Check if username already exists
+    bool register_user(string username, string password, const string& filename);            //Registers new user, saves user info(username, salt, hashed password) into file
+    bool verify_login(const string& username, const string& password);      //Varifies login by matching username, affiliated salt and the hashed password
 
+    //Functions to save or retrieve user data
     void save_to_file(const string& filename);
     void load_from_file(const string& filename);
     //constructor
